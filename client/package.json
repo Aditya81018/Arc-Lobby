@@ -37,6 +37,7 @@
 	},
 	"dependencies": {
 		"@faker-js/faker": "^10.3.0",
-		"daisyui": "^5.5.18"
+		"daisyui": "^5.5.18",
+		"socket.io-client": "^4.8.3"
 	}
 }
