@@ -5,8 +5,9 @@ export interface UserData {
   name: string;
 }
 
-export const users = new Map<string, UserData>();
+const users = new Map<string, UserData>();
 
+// Controllers
 export function getAllUser() {
   return Object.fromEntries(users);
 }
@@ -37,13 +38,14 @@ export function deleteUser(id: string) {
   return users.delete(id);
 }
 
-export const userRouter = Router();
+// Routes
+export const usersRouter = Router();
 
-userRouter.get("/users", (_req, res) => {
+usersRouter.get("/", (_req, res) => {
   res.json(getAllUser());
 });
 
-userRouter.put("/users/:id/", (req, _res) => {
+usersRouter.put("/:id/", (req, _res) => {
   const { id } = req.params;
   const data = req.body;
   updateUser(id, data);

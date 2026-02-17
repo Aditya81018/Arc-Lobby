@@ -1,9 +1,10 @@
-import express, { urlencoded } from "express";
+import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { initSocket } from "./lib/sockets";
-import { getAllUser, userRouter } from "./features/users";
+import { usersRouter } from "./features/users";
 import cors from "cors";
+import { lobbiesRouter } from "./features/lobbies";
 
 const app = express();
 const httpServer = createServer(app);
@@ -24,7 +25,9 @@ app.get("/", (_req, res) => {
   res.send("Server running 🚀");
 });
 
-app.use(userRouter);
+// Routers
+app.use("/users", usersRouter);
+app.use("/lobbies", lobbiesRouter);
 
 io.on("connection", (socket) => {
   console.log("Client connected:", socket.id);
