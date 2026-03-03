@@ -7,13 +7,12 @@
 	import { membersStore } from '../../features/lobby/store';
 	import { sendTextMessage } from '../../features/messages/controller';
 	import { lobbyMessagesStore } from '../../features/messages/store';
-	import { afterUpdate, onMount } from 'svelte';
 
 	const lobbyId = page.params.lobbyId!;
-	let message = '';
+	let message = $state('');
 
 	let messagesContainer: HTMLElement;
-	let showScrollButton = false;
+	let showScrollButton = $state(false);
 
 	function handleSendTextMessage() {
 		if (message.trim() === '') return;
@@ -45,14 +44,23 @@
 		showScrollButton = !isNearBottom();
 	}
 
-	afterUpdate(() => {
+	$effect(() => {
+		const messages = $lobbyMessagesStore;
+		if (!messages?.length) return;
+
+		const lastMessage = messages[messages.length - 1];
+		const isMe = lastMessage.senderId === socket.id;
+
+		// Always scroll if I sent it
+		if (isMe) {
+			scrollToBottom();
+			return;
+		}
+
+		// Otherwise only scroll if near bottom
 		if (isNearBottom()) {
 			scrollToBottom();
 		}
-	});
-
-	onMount(() => {
-		scrollToBottom();
 	});
 </script>
 
