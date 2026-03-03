@@ -16,6 +16,7 @@
 
 	function handleSendTextMessage() {
 		if (message.trim() === '') return;
+
 		sendTextMessage(lobbyId, socket.id!, message);
 		message = '';
 	}
