@@ -1,5 +1,6 @@
 import request from '$lib/request';
-import type { GameSession } from './store';
+import { get } from 'svelte/store';
+import { gameSessionsStore, type GameSession } from './store';
 
 export async function createGameSession(
 	gameId: string,
@@ -12,4 +13,13 @@ export async function createGameSession(
 		settings
 	});
 	return gameSession;
+}
+
+export async function getGameSessionById(id: string): Promise<GameSession | null> {
+	const gameSession = await request<GameSession>(`/game-sessions/${id}`);
+	return gameSession;
+}
+
+export function getLocalGameSessionById(id: string): GameSession | null {
+	return get(gameSessionsStore).get(id) || null;
 }

@@ -1,6 +1,8 @@
 import { socket } from '$lib/socket';
 import { get, writable } from 'svelte/store';
 import { lobbyStore } from '../lobby/store';
+import { gameSessionsStore } from '../game-sessions/store';
+import { getGameSessionById } from '../game-sessions/controller';
 
 export interface Message {
 	id: string;
@@ -13,8 +15,14 @@ export interface Message {
 
 export const lobbyMessagesStore = writable<Message[]>([]);
 
-socket.on('new-message', (message: Message) => {
+socket.on('new-message', async (message: Message) => {
 	if (message.roomId === get(lobbyStore)!.id) {
+		if (message.type === 'game-session-invite') {
+			const gameSession = await getGameSessionById(message.content as string);
+			if (gameSession) {
+				gameSessionsStore.update((sessions) => sessions.set(gameSession.id, gameSession));
+			}
+		}
 		lobbyMessagesStore.update((messages) => [...messages, message]);
 	}
 });

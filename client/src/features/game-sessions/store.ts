@@ -10,11 +10,11 @@ export interface GameSession {
 	data: unknown;
 }
 
-export const gameSessionsStore = writable<GameSession[]>([]);
+export const gameSessionsStore = writable<Map<string, GameSession>>(new Map());
 
 lobbyStore.subscribe((lobby) => {
 	if (!lobby) {
-		gameSessionsStore.set([]);
+		gameSessionsStore.set(new Map());
 		return;
 	}
 });

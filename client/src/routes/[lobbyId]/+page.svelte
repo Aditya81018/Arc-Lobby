@@ -8,6 +8,8 @@
 	import { sendTextMessage } from '../../features/messages/controller';
 	import { lobbyMessagesStore } from '../../features/messages/store';
 	import SendGameInviteButton from '../../features/games/SendGameInviteButton.svelte';
+	import { getLocalGameSessionById } from '../../features/game-sessions/controller';
+	import { getLocalGameById } from '../../features/games/controller';
 
 	const lobbyId = page.params.lobbyId!;
 	let message = $state('');
@@ -105,9 +107,50 @@
 							{msg.content}
 						</div>
 					{:else if msg.type === 'game-session-invite'}
-						<div>Game Session Invite: {msg.content}</div>
-					{:else}
-						{JSON.stringify(msg.content)}
+						{@const gameSession = getLocalGameSessionById(msg.content as string)!}
+						{@const game = getLocalGameById(gameSession?.gameId)!}
+
+						{#if gameSession && game}
+							<div class="chat-bubble max-w-sm chat-bubble-accent p-4 shadow-lg">
+								<div class="flex items-start gap-3">
+									<div class="avatar">
+										<div class="h-12 w-12 rounded-lg bg-base-300 ring-1 ring-secondary-content/20">
+											<img src={game.image} alt={game.name} />
+										</div>
+									</div>
+
+									<div class="flex-1 overflow-hidden">
+										<h3 class="flex items-center gap-2 text-sm leading-none font-bold">
+											{game.name}
+										</h3>
+
+										<div class="mt-2 flex flex-wrap gap-1">
+											{#each Object.entries(gameSession.settings) as [key, value]}
+												<div
+													class="badge h-4 gap-1 border-none badge-ghost bg-black/10 px-1.5 py-0 text-[10px] opacity-80"
+												>
+													<span class="font-semibold uppercase">{key.replaceAll('-', ' ')}:</span>
+													<span class="max-w-15 truncate italic">
+														{Array.isArray(value) ? value.length : value}
+													</span>
+												</div>
+											{/each}
+										</div>
+									</div>
+								</div>
+
+								<div class="mt-4 grid grid-cols-2 gap-2">
+									<button onclick={() => {}} class="btn h-8 btn-xs btn-primary"> Join </button>
+									<button onclick={() => {}} class="btn h-8 btn-xs btn-secondary">
+										Spectate
+									</button>
+								</div>
+							</div>
+						{:else}
+							<div class="chat-bubble chat-bubble-error text-xs italic">
+								Invite expired or game not found.
+							</div>
+						{/if}
 					{/if}
 				</div>
 			{:else}
