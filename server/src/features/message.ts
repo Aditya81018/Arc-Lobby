@@ -5,7 +5,7 @@ export interface Message {
   id: string;
   roomId: string;
   senderId: string;
-  type: "text" | "game-invite";
+  type: "text" | "game-session-invite";
   content: unknown;
   timestamp: number;
 }

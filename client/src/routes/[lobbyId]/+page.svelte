@@ -96,13 +96,19 @@
 					<div class="chat-header mb-1 text-xs opacity-50">
 						{getMemberFromId(msg.senderId)?.name || 'Unknown'}
 					</div>
-					<div
-						class="chat-bubble {isMe
-							? 'chat-bubble-primary'
-							: 'chat-bubble-secondary text-secondary-content'}"
-					>
-						{msg.content}
-					</div>
+					{#if msg.type === 'text'}
+						<div
+							class="chat-bubble {isMe
+								? 'chat-bubble-primary'
+								: 'chat-bubble-secondary text-secondary-content'}"
+						>
+							{msg.content}
+						</div>
+					{:else if msg.type === 'game-session-invite'}
+						<div>Game Session Invite: {msg.content}</div>
+					{:else}
+						{JSON.stringify(msg.content)}
+					{/if}
 				</div>
 			{:else}
 				<div class="h-full flex flex-col items-center gap-4 justify-center opacity-20">

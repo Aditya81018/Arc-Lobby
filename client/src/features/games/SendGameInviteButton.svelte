@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { Gamepad, X, ChevronLeft, Send } from '@lucide/svelte';
-	import { Games } from './games';
 	import type { Game } from './types';
-	import { sendGameInvite } from '../messages/controller';
+	import { sendGameSessionInvite } from '../messages/controller';
+	import { createGameSession } from '../game-sessions/controller';
+	import { page } from '$app/state';
+	import { userData } from '../user/store';
+	import { gamesStore } from './store';
+
+	const lobbyId = page.params.lobbyId!;
 
 	let modalRef: HTMLDialogElement;
 
@@ -35,7 +40,7 @@
 		}
 	};
 
-	const handleSendGameInvite = () => {
+	const handleSendGameInvite = async () => {
 		console.log(
 			'Invite Sent:',
 			$state.snapshot({
@@ -43,6 +48,10 @@
 				settings: settingsValues
 			})
 		);
+
+		const gameSession = await createGameSession(selectedGame!.id, lobbyId, settingsValues);
+		sendGameSessionInvite(lobbyId, $userData.id, gameSession.id);
+
 		closeModal();
 	};
 </script>
@@ -70,7 +79,7 @@
 		<div class="custom-scrollbar overflow-y-auto px-6 pb-6">
 			{#if !selectedGame}
 				<div class="grid grid-cols-2 gap-4 md:grid-cols-3">
-					{#each Object.values(Games) as game}
+					{#each Object.values($gamesStore) as game}
 						<button
 							onclick={() => handleGameSelect(game)}
 							class="group relative aspect-4/3 overflow-hidden rounded-2xl bg-base-300 transition-transform active:scale-95"

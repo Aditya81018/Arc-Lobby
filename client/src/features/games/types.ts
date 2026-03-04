@@ -3,6 +3,7 @@ export interface Game {
 	name: string;
 	image: string;
 	settings?: GameSetting[];
+	getDefaultData(settings: Game['settings']): unknown;
 }
 
 export interface BaseGameSetting<T> {

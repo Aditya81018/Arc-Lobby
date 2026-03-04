@@ -2,12 +2,13 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { socket } from '$lib/socket';
-
+	import { loadInitialDataFromServer } from '$lib/load-data';
 	let isLoading = $state(true);
 
 	let { children } = $props();
 	socket.connect();
-	socket.on('connect', () => {
+	socket.on('connect', async () => {
+		await loadInitialDataFromServer();
 		isLoading = false;
 	});
 </script>
