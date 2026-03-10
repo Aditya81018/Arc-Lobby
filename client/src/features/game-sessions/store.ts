@@ -9,15 +9,16 @@ export interface GameSession {
 	players: string[];
 	settings: Record<string, unknown>;
 	data: unknown;
+	state: 'waiting' | 'ongoing' | 'finished';
 }
 
-export const gameSessionsStore = writable<Map<string, GameSession>>(new Map());
+export const gameSessionsStore = writable<Record<string, GameSession>>({});
 export const currentGameSessionStore = writable<GameSession | null>(null);
 export const currentGameSessionPlayersStore = writable<UserData[] | null>(null);
 
 lobbyStore.subscribe((lobby) => {
 	if (!lobby) {
-		gameSessionsStore.set(new Map());
+		gameSessionsStore.set({});
 		return;
 	}
 });

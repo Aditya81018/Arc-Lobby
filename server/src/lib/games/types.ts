@@ -1,9 +1,13 @@
+import { GameSession } from "../../features/game-sessions";
+
 export interface Game {
   id: string;
   name: string;
   image: string;
-  settings?: GameSetting[];
+  settings: GameSetting[];
   getDefaultData(settings: Game["settings"]): unknown;
+  isJoinable: (session: GameSession) => boolean;
+  onPlayerJoin: (session: GameSession, playerId: string) => void;
 }
 
 export interface BaseGameSetting<T> {

@@ -21,14 +21,12 @@
 
 	onMount(() => {
 		async function handlePlayersUpdate(players: string[]) {
-			console.log($currentGameSessionStore);
 			if (!$currentGameSessionStore) {
 				$currentGameSessionPlayersStore = null;
 				return;
 			}
 			$currentGameSessionStore.players = players;
 			$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
-			console.log('Players updated:', $currentGameSessionPlayersStore);
 		}
 
 		handle();
@@ -40,8 +38,10 @@
 
 			$currentGameSessionStore = gameSession;
 			$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
+
+			socket.emit('join-game-session', gameSessionId);
 			socket.on('players-update', handlePlayersUpdate);
-			console.log('Joined game session:', gameSession, $currentGameSessionPlayersStore);
+
 			isLoading = false;
 		}
 
@@ -49,6 +49,8 @@
 			leaveGameSession(gameSessionId);
 			$currentGameSessionStore = null;
 			$currentGameSessionPlayersStore = null;
+
+			socket.emit('leave-game-session', gameSessionId);
 			socket.off('players-update', handlePlayersUpdate);
 		};
 	});

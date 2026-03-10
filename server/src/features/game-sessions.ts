@@ -11,6 +11,7 @@ export interface GameSession {
   players: string[];
   settings: Record<string, unknown>;
   data: unknown;
+  state: "waiting" | "ongoing" | "finished";
 }
 
 const gameSessions = new Map<string, GameSession>();
@@ -40,6 +41,7 @@ export function createGameSession<T>(
     players: [],
     settings,
     data,
+    state: "waiting",
   };
   gameSessions.set(sessionId, newSession);
   return newSession;
@@ -62,12 +64,17 @@ export function deleteGameSession(sessionId: string) {
 
 export function addPlayerToSession(sessionId: string, playerId: string) {
   const session = gameSessions.get(sessionId);
+  let isPlayerAdded = false;
   if (session && !session.players.includes(playerId)) {
-    session.players.push(playerId);
-    gameSessions.set(sessionId, session);
-    userToGameSession.set(playerId, sessionId);
+    const game = GAMES[session.gameId];
+    if (game.isJoinable(session)) {
+      session.players.push(playerId);
+      gameSessions.set(sessionId, session);
+      userToGameSession.set(playerId, sessionId);
+      isPlayerAdded = true;
+    }
   }
-  return session;
+  return isPlayerAdded;
 }
 
 export function removePlayerFromSession(sessionId: string, playerId: string) {
@@ -76,6 +83,11 @@ export function removePlayerFromSession(sessionId: string, playerId: string) {
     session.players = session.players.filter((id) => id !== playerId);
     gameSessions.set(sessionId, session);
     userToGameSession.delete(playerId);
+    if (session.players.length === 0) {
+      session.state = "finished";
+      io.to(session.lobbyId).emit("game-session-update", session);
+      deleteGameSession(sessionId);
+    }
   }
   return session;
 }
@@ -140,16 +152,21 @@ gameSessionsRouter.post("/", (req, res) => {
 
 gameSessionsRouter.post("/:id/join", (req, res) => {
   const { playerId } = req.body;
+  const gameSessionId = req.params.id;
   if (!playerId) {
     res.status(400).json({ error: "Missing playerId" });
     return;
   }
-  const session = addPlayerToSession(req.params.id, playerId);
-  if (!session) {
-    res.status(404).json({ error: "Game session not found" });
+  const success = addPlayerToSession(req.params.id, playerId);
+  if (!success) {
+    res.status(404).json({ error: "Failed to join session" });
     return;
   }
+  const session = getGameSessionById(gameSessionId)!;
   io.to(session.id).emit("players-update", session.players);
+
+  GAMES[session.gameId]?.onPlayerJoin(session, playerId);
+
   res.json(session);
 });
 

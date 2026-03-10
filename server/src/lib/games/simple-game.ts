@@ -1,5 +1,7 @@
+import { settings } from "cluster";
 import { publicLinkTo } from "../helpers";
 import { Game, GameSetting } from "./types";
+import { io } from "../..";
 
 const simpleGame: Game = {
   id: "simple-game",
@@ -42,6 +44,18 @@ const simpleGame: Game = {
   ],
   getDefaultData(settings) {
     return null;
+  },
+  isJoinable(session) {
+    const isSessionWaiting = session.state === "waiting";
+    const hasSpaceForPlayers =
+      session.players.length < (session.settings?.["players-count"] as number);
+    return isSessionWaiting && hasSpaceForPlayers;
+  },
+  onPlayerJoin(session, playerId) {
+    if (session.players.length === session.settings["players-count"]) {
+      session.state = "ongoing";
+      io.to(session.lobbyId).emit("game-session-update", session);
+    }
   },
 };
 

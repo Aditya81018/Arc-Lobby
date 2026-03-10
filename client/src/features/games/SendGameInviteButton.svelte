@@ -7,6 +7,7 @@
 	import { userData } from '../user/store';
 	import { gamesStore } from './store';
 	import { goto } from '$app/navigation';
+	import { resolve } from '$app/paths';
 
 	const lobbyId = page.params.lobbyId!;
 
@@ -42,24 +43,14 @@
 	};
 
 	const handleSendGameInvite = async () => {
-		console.log(
-			'Invite Sent:',
-			$state.snapshot({
-				game: selectedGame?.name,
-				settings: settingsValues
-			})
-		);
-
 		const gameSession = await createGameSession(selectedGame!.id, lobbyId, settingsValues);
 		sendGameSessionInvite(lobbyId, $userData.id, gameSession.id);
 
 		const session = await joinGameSession(gameSession.id);
 		if (session) {
-			goto(`/${lobbyId}/${session.id}`);
+			goto(resolve(`/${lobbyId}/${session.id}`));
 			return;
 		}
-
-		console.log('Failed to join game session');
 
 		closeModal();
 	};

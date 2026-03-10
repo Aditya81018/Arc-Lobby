@@ -13,7 +13,6 @@
 			goto(resolve(`/${lobbyId}/${session.id}`));
 			return;
 		}
-		console.log('Failed to join game session');
 	}
 </script>
 

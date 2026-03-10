@@ -6,6 +6,7 @@
 	import { getMembersData, joinLobby, leaveLobby } from '../../features/lobby/controllers';
 	import { socket } from '$lib/socket';
 	import { lobbyStore, membersStore } from '../../features/lobby/store';
+	import { gameSessionsStore, type GameSession } from '../../features/game-sessions/store';
 
 	const { children } = $props();
 	const lobbyId = page.params.lobbyId!;
@@ -21,6 +22,13 @@
 			$membersStore = await getMembersData($lobbyStore.id);
 		}
 
+		function handleGameSessionUpdate(gameSession: GameSession) {
+			const existingSession = $gameSessionsStore[gameSession.id];
+			if (existingSession) {
+				$gameSessionsStore[gameSession.id] = gameSession;
+			}
+		}
+
 		handle();
 		async function handle() {
 			const success = await joinLobby(lobbyId);
@@ -31,11 +39,13 @@
 			isLoading = false;
 			$membersStore = await getMembersData(lobbyId);
 			socket.on('member-update', handleMemberUpdate);
+			socket.on('game-session-update', handleGameSessionUpdate);
 		}
 
 		return () => {
 			leaveLobby(lobbyId);
 			socket.off('member-update', handleMemberUpdate);
+			socket.off('game-session-update', handleGameSessionUpdate);
 		};
 	});
 </script>

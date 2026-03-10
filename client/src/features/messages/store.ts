@@ -20,7 +20,7 @@ socket.on('new-message', async (message: Message) => {
 		if (message.type === 'game-session-invite') {
 			const gameSession = await getGameSessionById(message.content as string);
 			if (gameSession) {
-				gameSessionsStore.update((sessions) => sessions.set(gameSession.id, gameSession));
+				gameSessionsStore.update((session) => ({ ...session, [gameSession.id]: gameSession }));
 			}
 		}
 		lobbyMessagesStore.update((messages) => [...messages, message]);

@@ -8,12 +8,10 @@
 	import { sendTextMessage } from '../../features/messages/controller';
 	import { lobbyMessagesStore } from '../../features/messages/store';
 	import SendGameInviteButton from '../../features/games/SendGameInviteButton.svelte';
-	import { getLocalGameSessionById } from '../../features/game-sessions/controller';
 	import { getLocalGameById } from '../../features/games/controller';
 	import JoinGameSessionButton from '../../features/game-sessions/JoinGameSessionButton.svelte';
-	import { goto } from '$app/navigation';
-	import { resolve } from '$app/paths';
 	import SpectateGameSessionButton from '../../features/game-sessions/SpectateGameSessionButton.svelte';
+	import { gameSessionsStore } from '../../features/game-sessions/store';
 
 	const lobbyId = page.params.lobbyId!;
 	let message = $state('');
@@ -111,7 +109,7 @@
 							{msg.content}
 						</div>
 					{:else if msg.type === 'game-session-invite'}
-						{@const gameSession = getLocalGameSessionById(msg.content as string)!}
+						{@const gameSession = $gameSessionsStore[msg.content as string]}
 						{@const game = getLocalGameById(gameSession?.gameId)!}
 
 						{#if gameSession && game}
@@ -143,10 +141,18 @@
 									</div>
 								</div>
 
-								<div class="mt-4 grid grid-cols-2 gap-2">
-									<JoinGameSessionButton gameSessionId={gameSession.id} />
-									<SpectateGameSessionButton gameSessionId={gameSession.id} />
-								</div>
+								{#if gameSession.state === 'waiting'}
+									<div class="mt-4 grid grid-cols-2 gap-2">
+										<JoinGameSessionButton gameSessionId={gameSession.id} />
+										<SpectateGameSessionButton gameSessionId={gameSession.id} />
+									</div>
+								{:else if gameSession.state === 'ongoing'}
+									<div class="mt-4 grid grid-cols-2 gap-2">
+										<SpectateGameSessionButton gameSessionId={gameSession.id} />
+									</div>
+								{:else if gameSession.state === 'finished'}
+									<div>Game Expired</div>
+								{/if}
 							</div>
 						{:else}
 							<div class="chat-bubble chat-bubble-error text-xs italic">
