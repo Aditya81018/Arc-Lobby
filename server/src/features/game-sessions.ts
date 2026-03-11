@@ -187,10 +187,6 @@ gameSessionsRouter.post("/:id/leave", (req, res) => {
 
 gameSessionsRouter.get("/:id/players", (req, res) => {
   const playerData = getGameSessionPlayersData(req.params.id);
-  if (playerData === null) {
-    res.status(404).json({ error: "Game session not found" });
-    return;
-  }
   res.json(playerData);
 });
 

@@ -6,7 +6,11 @@
 	import { getMembersData, joinLobby, leaveLobby } from '../../features/lobby/controllers';
 	import { socket } from '$lib/socket';
 	import { lobbyStore, membersStore } from '../../features/lobby/store';
-	import { gameSessionsStore, type GameSession } from '../../features/game-sessions/store';
+	import {
+		currentGameSessionStore as session,
+		gameSessionsStore,
+		type GameSession
+	} from '../../features/game-sessions/store';
 
 	const { children } = $props();
 	const lobbyId = page.params.lobbyId!;
@@ -26,6 +30,9 @@
 			const existingSession = $gameSessionsStore[gameSession.id];
 			if (existingSession) {
 				$gameSessionsStore[gameSession.id] = gameSession;
+				if ($session && $session.id === existingSession.id) {
+					$session = gameSession;
+				}
 			}
 		}
 

@@ -2,6 +2,10 @@ import { PUBLIC_SERVER_URL } from '$env/static/public';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+export interface ErrorRes {
+	error: string;
+}
+
 export default async function request<T = unknown>(
 	endpoint: string,
 	method: HttpMethod = 'GET',
