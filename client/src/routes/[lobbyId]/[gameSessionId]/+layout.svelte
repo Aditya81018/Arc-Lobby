@@ -33,7 +33,7 @@
 		async function handle() {
 			const gameSession = await getGameSessionById(gameSessionId);
 			if (!gameSession || gameSession.lobbyId !== lobbyId) {
-				return goto(resolve('/'));
+				return goto(resolve(`/${lobbyId}`));
 			}
 
 			$currentGameSessionStore = gameSession;

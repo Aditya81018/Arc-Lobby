@@ -132,19 +132,11 @@ gameSessionsRouter.get("/", (req, res) => {
 
 gameSessionsRouter.get("/:id", (req, res) => {
   const session = getGameSessionById(req.params.id);
-  if (!session) {
-    res.status(404).json({ error: "Game session not found" });
-    return;
-  }
   res.json(session);
 });
 
 gameSessionsRouter.post("/", (req, res) => {
   const { gameId, lobbyId, settings } = req.body;
-  if (!gameId || !lobbyId) {
-    res.status(400).json({ error: "Missing required fields" });
-    return;
-  }
   const defaultData = GAMES[gameId]?.getDefaultData(settings) || {};
   const newSession = createGameSession(gameId, lobbyId, settings || {}, defaultData);
   res.status(201).json(newSession);
@@ -172,15 +164,7 @@ gameSessionsRouter.post("/:id/join", (req, res) => {
 
 gameSessionsRouter.post("/:id/leave", (req, res) => {
   const { playerId } = req.body;
-  if (!playerId) {
-    res.status(400).json({ error: "Missing playerId" });
-    return;
-  }
-  const session = removePlayerFromSession(req.params.id, playerId);
-  if (!session) {
-    res.status(404).json({ error: "Game session not found" });
-    return;
-  }
+  const session = removePlayerFromSession(req.params.id, playerId)!;
   io.to(session.id).emit("players-update", session.players);
   res.json(session);
 });
