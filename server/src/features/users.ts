@@ -3,6 +3,8 @@ import { Router } from "express";
 export interface UserData {
   id: string;
   name: string;
+  emoji: string;
+  color: { foreground: string; background: string };
 }
 
 const users = new Map<string, UserData>();
@@ -45,8 +47,9 @@ usersRouter.get("/", (_req, res) => {
   res.json(getAllUser());
 });
 
-usersRouter.put("/:id/", (req, _res) => {
+usersRouter.put("/:id/", (req, res) => {
   const { id } = req.params;
   const data = req.body;
-  updateUser(id, data);
+  const updatedUser = updateUser(id, data);
+  res.json(updatedUser);
 });

@@ -12,6 +12,8 @@
 	import JoinGameSessionButton from '../../features/game-sessions/JoinGameSessionButton.svelte';
 	import SpectateGameSessionButton from '../../features/game-sessions/SpectateGameSessionButton.svelte';
 	import { gameSessionsStore } from '../../features/game-sessions/store';
+	import { userData } from '../../features/user/store';
+	import UserAvatar from '../../components/UserAvatar.svelte';
 
 	const lobbyId = page.params.lobbyId!;
 	let message = $state('');
@@ -96,16 +98,16 @@
 		>
 			{#each $lobbyMessagesStore as msg, i (i)}
 				{@const isMe = msg.senderId === socket.id}
+				{@const memberData = getMemberFromId(msg.senderId)}
 				<div class="chat {isMe ? 'chat-end' : 'chat-start'}">
-					<div class="chat-header mb-1 text-xs opacity-50">
-						{getMemberFromId(msg.senderId)?.name || 'Unknown'}
+					<div
+						class="chat-header mb-1 text-xs opacity-50"
+						style="color: {memberData?.color.foreground};"
+					>
+						{memberData?.name || 'Unknown'}
 					</div>
 					{#if msg.type === 'text'}
-						<div
-							class="chat-bubble {isMe
-								? 'chat-bubble-primary'
-								: 'chat-bubble-secondary text-secondary-content'}"
-						>
+						<div class="chat-bubble" style="background-color: {memberData?.color.background};">
 							{msg.content}
 						</div>
 					{:else if msg.type === 'game-session-invite'}
@@ -208,13 +210,10 @@
 			<ul class="space-y-1 p-2">
 				{#each $membersStore as member, i (i)}
 					<li>
-						<div
-							class="flex items-center gap-3 {member.id === socket.id
-								? 'bg-primary/10 font-medium text-primary'
-								: ''}"
-						>
+						<div class="flex items-center gap-3" style="color: {member.color.foreground}">
+							<UserAvatar user={member} />
 							<span class="flex-1 truncate">{member.name}</span>
-							{#if member.id === socket.id}
+							{#if member.id === $userData.id}
 								<span class="badge badge-sm badge-primary">You</span>
 							{/if}
 						</div>
