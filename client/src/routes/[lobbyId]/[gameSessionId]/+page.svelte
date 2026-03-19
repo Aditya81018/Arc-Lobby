@@ -1,23 +1,17 @@
 <script lang="ts">
-	import LeaveGameSessionButton from '../../../features/game-sessions/LeaveGameSessionButton.svelte';
 	import {
-		currentGameSessionPlayersStore,
-		currentGameSessionStore
+		currentGameSessionPlayersStore as players,
+		currentGameSessionStore as session
 	} from '../../../features/game-sessions/store';
-	import SimpleGameUI from '../../../features/games/user-interface/SimpleGameUI.svelte';
+	import SimpleGameUI from '../../../features/games/simple-game/SimpleGameUI.svelte';
+	import { type SimpleGameSession } from '../../../features/games/simple-game/types';
 	import { userData } from '../../../features/user/store';
 
-	const isPlayer = $currentGameSessionStore?.players.includes($userData.id);
+	const isPlayer = $session?.players.includes($userData.id) || false;
 </script>
 
-<h1>Game Session {isPlayer ? 'Player' : 'Spectator'}</h1>
-<LeaveGameSessionButton />
-{#each $currentGameSessionPlayersStore as player, i (i)}
-	<div>
-		{player.name}
-	</div>
-{/each}
-
-{#if $currentGameSessionStore?.gameId === 'simple-game'}
-	<SimpleGameUI />
-{/if}
+<div class="flex h-svh w-screen flex-col">
+	{#if $session?.gameId === 'simple-game'}
+		<SimpleGameUI session={$session as SimpleGameSession} players={$players!} {isPlayer} />
+	{/if}
+</div>

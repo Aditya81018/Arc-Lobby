@@ -6,7 +6,8 @@
 	import { socket } from '$lib/socket';
 	import {
 		currentGameSessionPlayersStore,
-		currentGameSessionStore
+		currentGameSessionStore,
+		type GameSession
 	} from '../../../features/game-sessions/store';
 	import {
 		getCurrentGameSessionPlayersData,
@@ -29,20 +30,30 @@
 			$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
 		}
 
+		async function handleSessionDataUpdate(newData: GameSession['data']) {
+			if (!$currentGameSessionStore) return;
+			$currentGameSessionStore.data = newData;
+		}
+
 		handle();
 		async function handle() {
-			const gameSession = await getGameSessionById(gameSessionId);
-			if (!gameSession || gameSession.lobbyId !== lobbyId) {
-				return goto(resolve(`/${lobbyId}`));
+			try {
+				const gameSession = await getGameSessionById(gameSessionId);
+				if (!gameSession || gameSession.lobbyId !== lobbyId) {
+					return goto(resolve(`/${lobbyId}`));
+				}
+
+				$currentGameSessionStore = gameSession;
+				$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
+
+				socket.emit('join-game-session', gameSessionId);
+				socket.on('players-update', handlePlayersUpdate);
+				socket.on('session-data-update', handleSessionDataUpdate);
+
+				isLoading = false;
+			} catch {
+				goto(resolve(`/${lobbyId}`));
 			}
-
-			$currentGameSessionStore = gameSession;
-			$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
-
-			socket.emit('join-game-session', gameSessionId);
-			socket.on('players-update', handlePlayersUpdate);
-
-			isLoading = false;
 		}
 
 		return () => {
@@ -52,6 +63,7 @@
 
 			socket.emit('leave-game-session', gameSessionId);
 			socket.off('players-update', handlePlayersUpdate);
+			socket.off('session-data-update', handleSessionDataUpdate);
 		};
 	});
 </script>

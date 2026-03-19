@@ -10,7 +10,7 @@ export interface GameSession {
   lobbyId: string;
   players: string[];
   settings: Record<string, unknown>;
-  data: unknown;
+  data: any;
   state: "waiting" | "ongoing" | "finished";
 }
 
@@ -33,7 +33,10 @@ export function createGameSession<T>(
   settings: Record<string, unknown>,
   data: T,
 ): GameSession {
-  const sessionId = crypto.randomUUID();
+  let sessionId = "";
+  do {
+    sessionId = crypto.randomUUID().substring(0, 6).toUpperCase();
+  } while (getGameSessionById(sessionId) !== undefined);
   const newSession: GameSession = {
     id: sessionId,
     gameId,
@@ -110,15 +113,18 @@ export function getGameSessionPlayersData(sessionId: string) {
 }
 
 export function initGameSessionSockets(socket: Socket) {
+  let removeGameSockets: (() => void) | null = null;
   socket.on("join-game-session", (sessionId: string) => {
     const session = getGameSessionById(sessionId);
     if (session) {
       socket.join(sessionId);
+      removeGameSockets = GAMES[session.gameId].initSockets(session, socket);
     }
   });
 
   socket.on("leave-game-session", (sessionId: string) => {
     socket.leave(sessionId);
+    if (removeGameSockets) removeGameSockets();
   });
 }
 
