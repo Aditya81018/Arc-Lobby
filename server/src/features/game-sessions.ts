@@ -8,7 +8,7 @@ export interface GameSession {
   id: string;
   gameId: string;
   lobbyId: string;
-  players: string[];
+  players: (string | undefined)[];
   settings: Record<string, unknown>;
   data: any;
   state: "waiting" | "ongoing" | "finished";
@@ -82,15 +82,22 @@ export function addPlayerToSession(sessionId: string, playerId: string) {
 
 export function removePlayerFromSession(sessionId: string, playerId: string) {
   const session = gameSessions.get(sessionId);
-  if (session) {
+  if (!session) return;
+
+  if (session.state === "waiting") {
     session.players = session.players.filter((id) => id !== playerId);
-    gameSessions.set(sessionId, session);
     userToGameSession.delete(playerId);
-    if (session.players.length === 0) {
-      session.state = "finished";
-      io.to(session.lobbyId).emit("game-session-update", session);
-      deleteGameSession(sessionId);
-    }
+  }
+
+  if (session.state === "ongoing") {
+    const index = session.players.indexOf(playerId);
+    session.players[index] = undefined;
+  }
+
+  if (session.players.length === 0) {
+    session.state = "finished";
+    io.to(session.lobbyId).emit("game-session-update", session);
+    deleteGameSession(sessionId);
   }
   return session;
 }
@@ -108,7 +115,9 @@ export function getGameSessionPlayersData(sessionId: string) {
   if (!session) {
     return null;
   }
-  const playerData = session.players.map((playerId) => getUserById(playerId));
+  const playerData = session.players.map((playerId) =>
+    playerId ? getUserById(playerId) : undefined,
+  );
   return playerData;
 }
 

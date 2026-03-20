@@ -69,7 +69,12 @@ const simpleGame: SimpleGame = {
 
   getRandomData() {
     const target = randInt(1, 100);
-    const options = [randInt(1, 100), randInt(1, 100), randInt(1, 100)] as [number, number, number];
+
+    let options;
+    do {
+      options = [randInt(1, 100), randInt(1, 100), randInt(1, 100)] as [number, number, number];
+    } while (options[0] === options[1] || options[1] === options[2] || options[2] === options[0]);
+
     return { target, options };
   },
 
@@ -124,10 +129,8 @@ const simpleGame: SimpleGame = {
         if (Math.abs(target - option) > Math.abs(target - farthestOpt)) farthestOpt = option;
       }
 
-      if (closestOpt !== farthestOpt) {
-        if (option === closestOpt) playerData.points++;
-        else if (option === farthestOpt) playerData.lives--;
-      }
+      if (option === closestOpt) playerData.points++;
+      else if (option === farthestOpt) playerData.lives--;
 
       const game = GAMES[session.gameId] as SimpleGame;
       const randomData = game.getRandomData();

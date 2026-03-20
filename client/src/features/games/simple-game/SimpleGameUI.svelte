@@ -12,14 +12,14 @@
 		isPlayer
 	}: {
 		session: SimpleGameSession;
-		players: UserData[];
+		players: (UserData | undefined)[];
 		isPlayer: boolean;
 	} = $props();
 
 	console.log(session);
 
 	let isUserTurn = $derived(session.players[session.data.turnOf] === $user.id);
-	let isOptionsEnabled = $derived(isUserTurn);
+	let isOptionsEnabled = $derived(isUserTurn && session.state === 'ongoing');
 
 	function handleOptionSelect(number: number) {
 		if (!isPlayer || session.state !== 'ongoing') return;
@@ -41,10 +41,10 @@
 		<div class="mt-2 flex items-center justify-between">
 			<div class="flex items-center gap-2">
 				<UserAvatar user={player} />
-				<div style="color: {player.color.foreground}">
-					{player.name}
+				<div style="color: {player?.color.foreground || 'gray'}">
+					{player?.name || 'Unknown'}
 					<span class="text-sm font-bold opacity-50">
-						{player.id === $user.id ? '(You)' : ''}
+						{player?.id === $user.id ? '(You)' : ''}
 					</span>
 				</div>
 			</div>

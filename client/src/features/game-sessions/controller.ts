@@ -40,6 +40,8 @@ export async function leaveGameSession(gameSessionId: string): Promise<GameSessi
 }
 
 export async function getCurrentGameSessionPlayersData(gameSessionId: string) {
-	const playerData = await request<UserData[]>(`/game-sessions/${gameSessionId}/players`);
+	const playerData = await request<(UserData | undefined)[]>(
+		`/game-sessions/${gameSessionId}/players`
+	);
 	return playerData;
 }
