@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { Heart, SquareArrowRightExit } from '@lucide/svelte';
-	import UserAvatar from '../../../components/UserAvatar.svelte';
 	import { type UserData, userData as user } from '../../user/store';
 	import { resolve } from '$app/paths';
 	import { socket } from '$lib/socket';
 	import type { SimpleGameSession } from './types';
+	import { SquareArrowRightExit } from '@lucide/svelte';
+	import PlayerCard from './PlayerCard.svelte';
 
 	const {
 		session,
@@ -15,8 +15,6 @@
 		players: (UserData | undefined)[];
 		isPlayer: boolean;
 	} = $props();
-
-	console.log(session);
 
 	let isUserTurn = $derived(session.players[session.data.turnOf] === $user.id);
 	let isOptionsEnabled = $derived(isUserTurn && session.state === 'ongoing');
@@ -40,30 +38,12 @@
 		You are a {isPlayer ? `Player - ${hasPlayerLost ? 'Lost' : 'Playing'}` : 'Spectator'}
 	</div>
 
-	{#each players as player, i (i)}
-		{@const playerData = session.data.playersData[i]}
-		<div class="mt-2 flex items-center justify-between">
-			<div class="flex items-center gap-2">
-				<UserAvatar user={player} />
-				<div style="color: {player?.color.foreground || 'gray'}">
-					{player?.name || 'Unknown'}
-					<span class="text-sm font-bold opacity-50">
-						{player?.id === $user.id ? '(You)' : ''}
-					</span>
-				</div>
-			</div>
-			<div class="flex items-center gap-2">
-				{#each Array(playerData.lives) as id, i (i)}
-					<Heart color="red" size={16} {id} />
-				{:else}
-					<div class="text-error font-medium text-sm">LOST</div>
-				{/each}
-				<span class="text-success">
-					{playerData.points}
-				</span>
-			</div>
-		</div>
-	{/each}
+	<div class="flex flex-wrap gap-2">
+		{#each players as player, i (i)}
+			{@const playerData = session.data.playersData[i]}
+			<PlayerCard {player} {playerData} {session} />
+		{/each}
+	</div>
 
 	<a
 		href={resolve(`/${session.lobbyId}`)}
