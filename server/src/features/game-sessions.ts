@@ -181,6 +181,7 @@ gameSessionsRouter.post("/:id/join", (req, res) => {
 gameSessionsRouter.post("/:id/leave", (req, res) => {
   const { playerId } = req.body;
   const session = removePlayerFromSession(req.params.id, playerId)!;
+  if (!session) return;
   io.to(session.id).emit("players-update", session.players);
   res.json(session);
 });

@@ -38,6 +38,7 @@
 	"dependencies": {
 		"@faker-js/faker": "^10.3.0",
 		"@lucide/svelte": "^0.576.0",
+		"@sveltejs/adapter-node": "^5.5.4",
 		"daisyui": "^5.5.18",
 		"socket.io-client": "^4.8.3"
 	}

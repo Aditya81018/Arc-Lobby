@@ -99,6 +99,7 @@
 				<div class="divide-y divide-base-200">
 					{#each Object.values(selectedGame.settings || {}) as setting, i (i)}
 						<div class="flex items-center gap-4 py-5 first:pt-0">
+							<!-- svelte-ignore a11y_label_has_associated_control -->
 							<label class="block text-sm font-bold tracking-wider uppercase opacity-60">
 								{setting.name}:
 							</label>

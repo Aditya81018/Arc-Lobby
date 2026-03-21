@@ -16,6 +16,7 @@
 		children: Snippet<[]>;
 	} = $props();
 
+	// svelte-ignore state_referenced_locally
 	const playersCount = session.settings['players-count'] as number;
 
 	function getPlayerCardPropsFor(index: number) {
