@@ -43,5 +43,6 @@ export async function getCurrentGameSessionPlayersData(gameSessionId: string) {
 	const playerData = await request<(UserData | undefined)[]>(
 		`/game-sessions/${gameSessionId}/players`
 	);
+	console.log('player data fetched', playerData);
 	return playerData;
 }

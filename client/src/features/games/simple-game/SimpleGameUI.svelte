@@ -4,7 +4,7 @@
 	import { socket } from '$lib/socket';
 	import type { SimpleGameSession } from './types';
 	import { SquareArrowRightExit } from '@lucide/svelte';
-	import PlayerCard from './PlayerCard.svelte';
+	import PlayersLayout from './PlayersLayout.svelte';
 
 	const {
 		session,
@@ -18,8 +18,6 @@
 
 	let isUserTurn = $derived(session.players[session.data.turnOf] === $user.id);
 	let isOptionsEnabled = $derived(isUserTurn && session.state === 'ongoing');
-	let playerData = $derived(session.data.playersData[session.players.indexOf($user.id)]);
-	let hasPlayerLost = $derived(playerData.lives === 0);
 
 	function handleOptionSelect(number: number) {
 		if (!isPlayer || session.state !== 'ongoing') return;
@@ -30,46 +28,41 @@
 </script>
 
 <div class="flex h-full flex-col p-4">
-	<div class="text-4xl font-medium">Simple Game</div>
-	<div class="text-sm text-gray-400">
-		{session.state === 'waiting' ? 'Waiting for more players' : 'Game Started'}
-	</div>
-	<div class="text-sm text-gray-400">
-		You are a {isPlayer ? `Player - ${hasPlayerLost ? 'Lost' : 'Playing'}` : 'Spectator'}
-	</div>
-
-	<div class="flex flex-wrap gap-2">
-		{#each players as player, i (i)}
-			{@const playerData = session.data.playersData[i]}
-			<PlayerCard {player} {playerData} {session} />
-		{/each}
-	</div>
-
 	<a
 		href={resolve(`/${session.lobbyId}`)}
-		class="btn absolute top-4 right-4 btn-square btn-soft btn-error"
+		class="btn absolute top-4 right-4 z-50 btn-square btn-soft btn-error"
 		><SquareArrowRightExit />
 	</a>
 
-	<div class="flex h-full w-full flex-col items-center justify-center gap-4">
-		<div id="index-number" class="text-9xl font-bold">{session.data.target}</div>
-		<div class="h-8 opacity-50">{session.data.message}</div>
-		<div class="flex w-full items-center justify-center gap-8">
-			{#each session.data.options as option, i (i)}
-				<button
-					class="btn btn-square btn-xl btn-primary"
-					disabled={!isOptionsEnabled}
-					onclick={handleOptionSelect(option)}>{option}</button
+	<PlayersLayout {players} playersData={session.data.playersData} {session}>
+		{#if session.state === 'finished'}
+			{@const winner = players.find((player) => player?.id === session.winner)}
+			<div class="flex flex-col items-center gap-4">
+				<div class="text-4xl font-black">{winner?.name ?? 'Unknown'} Won!</div>
+				<a href={resolve(`/${session.lobbyId}`)} class="btn w-fit btn-sm btn-primary"
+					>Back to Lobby</a
 				>
-			{/each}
-		</div>
-	</div>
-
-	{#if session.state === 'finished'}
-		<div>
-			Game has ended. Review screen must be displayed. Winner is {players.find(
-				(player) => player?.id === session.winner
-			)?.name}
-		</div>
-	{/if}
+			</div>
+		{:else}
+			<!-- else content here -->
+			<div
+				class="flex h-full w-full flex-col items-center justify-center gap-4 {session.state ===
+				'waiting'
+					? 'opacity-25'
+					: 'opacity-100'}"
+			>
+				<div id="index-number" class="text-9xl font-bold">{session.data.target}</div>
+				<div class="h-8 opacity-50">{session.data.message}</div>
+				<div class="flex w-full items-center justify-center gap-4">
+					{#each session.data.options as option, i (i)}
+						<button
+							class="btn btn-square btn-xl btn-primary"
+							disabled={!isOptionsEnabled}
+							onclick={handleOptionSelect(option)}>{option}</button
+						>
+					{/each}
+				</div>
+			</div>
+		{/if}
+	</PlayersLayout>
 </div>

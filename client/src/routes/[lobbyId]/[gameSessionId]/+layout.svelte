@@ -44,6 +44,7 @@
 				}
 
 				$currentGameSessionStore = gameSession;
+				console.log('trigger 1');
 				$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
 
 				socket.emit('join-game-session', gameSessionId);

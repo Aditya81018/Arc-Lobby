@@ -74,6 +74,7 @@ const simpleGame: SimpleGame = {
       lobbyId,
       players: [],
       winner: undefined,
+      spectators: [],
       settings,
       data: this.getDefaultData(settings),
       state: "waiting",
@@ -118,7 +119,7 @@ const simpleGame: SimpleGame = {
 
     return {
       ...this.getRandomData(),
-      message: "",
+      message: "Waiting for players",
       turnOf: 0,
       playersData,
     };
@@ -134,6 +135,7 @@ const simpleGame: SimpleGame = {
   onPlayerJoin(session, playerId) {
     if (session.players.length === session.settings["players-count"]) {
       session.state = "ongoing";
+      session.data.message = "Game Started!";
       io.to(session.lobbyId).emit("game-session-update", session);
     }
   },
@@ -163,7 +165,6 @@ const simpleGame: SimpleGame = {
       const playerData = session.data.playersData[playerDataID];
 
       session.data.message = `${player.name} selected ${option}`;
-      session.nextTurn();
 
       let closestOpt = session.data.options[0],
         farthestOpt = session.data.options[0];
@@ -194,6 +195,7 @@ const simpleGame: SimpleGame = {
         const randomData = game.getRandomData();
         session.data.target = randomData.target;
         session.data.options = randomData.options;
+        session.nextTurn();
       }
 
       io.to(session.id).emit("session-data-update", session.data);

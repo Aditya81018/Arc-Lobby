@@ -9,6 +9,7 @@ export interface GameSession {
   gameId: string;
   lobbyId: string;
   players: (string | undefined)[];
+  spectators: string[];
   winner: string | undefined; // Winner Player ID
   settings: Record<string, unknown>;
   data: any;
@@ -88,16 +89,6 @@ export function removePlayerFromSession(sessionId: string, playerId: string) {
     session.players[index] = undefined;
   }
 
-  if (
-    session.players.length === 0 ||
-    // Game is ongoing ........ and All players had left i.e. all players are undefined
-    (session.state === "ongoing" && !session.players.some((ele) => ele !== undefined))
-  ) {
-    session.state = "finished";
-    io.to(session.lobbyId).emit("game-session-update", session);
-    deleteGameSession(sessionId);
-  }
-
   GAMES[session.gameId].onPlayerLeave(session, playerId);
 
   return session;
@@ -128,12 +119,22 @@ export function initGameSessionSockets(socket: Socket) {
     const session = getGameSessionById(sessionId);
     if (session) {
       socket.join(sessionId);
+      session.spectators.push(socket.id);
       removeGameSockets = GAMES[session.gameId].initSockets(session, socket);
     }
   });
 
   socket.on("leave-game-session", (sessionId: string) => {
     socket.leave(sessionId);
+    const session = getGameSessionById(sessionId);
+    if (session) {
+      session.spectators = session.spectators.filter((spectator) => spectator !== socket.id);
+      if (session.spectators.length === 0) {
+        session.state = "finished";
+        io.to(session.lobbyId).emit("game-session-update", session);
+        deleteGameSession(sessionId);
+      }
+    }
     if (removeGameSockets) removeGameSockets();
   });
 }
