@@ -20,6 +20,8 @@
 
 	let isUserTurn = $derived(session.players[session.data.turnOf] === $user.id);
 	let isOptionsEnabled = $derived(isUserTurn && session.state === 'ongoing');
+	let playerData = $derived(session.data.playersData[session.players.indexOf($user.id)]);
+	let hasPlayerLost = $derived(playerData.lives === 0);
 
 	function handleOptionSelect(number: number) {
 		if (!isPlayer || session.state !== 'ongoing') return;
@@ -34,7 +36,9 @@
 	<div class="text-sm text-gray-400">
 		{session.state === 'waiting' ? 'Waiting for more players' : 'Game Started'}
 	</div>
-	<div class="text-sm text-gray-400">You are a {isPlayer ? 'Player' : 'Spectator'}</div>
+	<div class="text-sm text-gray-400">
+		You are a {isPlayer ? `Player - ${hasPlayerLost ? 'Lost' : 'Playing'}` : 'Spectator'}
+	</div>
 
 	{#each players as player, i (i)}
 		{@const playerData = session.data.playersData[i]}
@@ -51,6 +55,8 @@
 			<div class="flex items-center gap-2">
 				{#each Array(playerData.lives) as id, i (i)}
 					<Heart color="red" size={16} {id} />
+				{:else}
+					<div class="text-error font-medium text-sm">LOST</div>
 				{/each}
 				<span class="text-success">
 					{playerData.points}
