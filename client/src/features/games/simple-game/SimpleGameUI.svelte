@@ -86,6 +86,10 @@
 	</div>
 
 	{#if session.state === 'finished'}
-		<div>Game has ended. Review screen must be displayed.</div>
+		<div>
+			Game has ended. Review screen must be displayed. Winner is {players.find(
+				(player) => player?.id === session.winner
+			)?.name}
+		</div>
 	{/if}
 </div>

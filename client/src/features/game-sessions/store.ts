@@ -7,6 +7,7 @@ export interface GameSession {
 	gameId: string;
 	lobbyId: string;
 	players: (string | undefined)[];
+	winner: string | undefined;
 	settings: Record<string, unknown>;
 	data: unknown;
 	state: 'waiting' | 'ongoing' | 'finished';

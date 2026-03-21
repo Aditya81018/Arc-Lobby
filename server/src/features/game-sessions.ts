@@ -9,6 +9,7 @@ export interface GameSession {
   gameId: string;
   lobbyId: string;
   players: (string | undefined)[];
+  winner: string | undefined; // Winner Player ID
   settings: Record<string, unknown>;
   data: any;
   state: "waiting" | "ongoing" | "finished";

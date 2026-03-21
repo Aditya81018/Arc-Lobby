@@ -73,6 +73,7 @@ const simpleGame: SimpleGame = {
       gameId: this.id,
       lobbyId,
       players: [],
+      winner: undefined,
       settings,
       data: this.getDefaultData(settings),
       state: "waiting",
@@ -144,6 +145,12 @@ const simpleGame: SimpleGame = {
         session.nextTurn();
         io.to(session.id).emit("session-data-update", session.data);
       }
+      const activePlayers = session.players.filter((player) => player !== undefined);
+      if (activePlayers.length === 1) {
+        session.state = "finished";
+        session.winner = activePlayers[0];
+        io.to(session.lobbyId).emit("game-session-update", session);
+      }
     }
   },
 
@@ -166,12 +173,28 @@ const simpleGame: SimpleGame = {
         if (Math.abs(target - option) > Math.abs(target - farthestOpt)) farthestOpt = option;
       }
 
-      if (option === closestOpt) playerData.points++;
-      else if (option === farthestOpt) playerData.lives--;
+      if (option === closestOpt) {
+        playerData.points++;
+        if (playerData.points === session.settings["target"]) {
+          session.winner = player.id;
+          session.state = "finished";
+          io.to(session.lobbyId).emit("game-session-update", session);
+        }
+      } else if (option === farthestOpt) {
+        playerData.lives--;
+        const playersStillPlaying = session.data.playersData.filter((player) => player.lives > 0);
+        if (playersStillPlaying.length === 1) {
+          session.winner = session.players[playersStillPlaying[0].id];
+          session.state = "finished";
+          io.to(session.lobbyId).emit("game-session-update", session);
+        }
+      }
 
-      const randomData = game.getRandomData();
-      session.data.target = randomData.target;
-      session.data.options = randomData.options;
+      if (session.state === "ongoing") {
+        const randomData = game.getRandomData();
+        session.data.target = randomData.target;
+        session.data.options = randomData.options;
+      }
 
       io.to(session.id).emit("session-data-update", session.data);
     }
