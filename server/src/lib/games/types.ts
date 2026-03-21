@@ -1,17 +1,20 @@
 import { Socket } from "socket.io";
 import { GameSession } from "../../features/game-sessions";
 
-export interface Game {
+export interface Game<TSession extends GameSession = GameSession> {
   id: string;
   name: string;
   image: string;
   settings: GameSetting[];
-  getDefaultData(settings: Record<string, any>): unknown;
-  isJoinable: (session: GameSession) => boolean;
-  onPlayerJoin: (session: GameSession, playerId: string) => void;
+
+  createGameSession: (id: string, lobbyId: string, settings: ProcessedSettings) => TSession;
+  getDefaultData(settings: ProcessedSettings): TSession["data"];
+  isJoinable: (session: TSession) => boolean;
+  onPlayerJoin: (session: TSession, playerId: string) => void;
+  onPlayerLeave: (session: TSession, playerId: string) => void;
 
   // Will return a function to be called after player leaves, usually to remove socket listeners
-  initSockets: (session: GameSession, socket: Socket) => () => void;
+  initSockets: (session: TSession, socket: Socket) => () => void;
 }
 
 export interface BaseGameSetting<T> {
@@ -45,3 +48,5 @@ export type GameSetting<T = unknown> =
   | PickOneGameSetting<T>
   | PickManyGameSetting<T>
   | BooleanGameSetting;
+
+export type ProcessedSettings = Record<string, any>;

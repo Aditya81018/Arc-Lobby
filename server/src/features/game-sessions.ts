@@ -27,25 +27,18 @@ export function getGameSessionById(sessionId: string) {
   return gameSessions.get(sessionId);
 }
 
-export function createGameSession<T>(
+export function createGameSession(
   gameId: string,
   lobbyId: string,
   settings: Record<string, unknown>,
-  data: T,
 ): GameSession {
   let sessionId = "";
   do {
     sessionId = crypto.randomUUID().substring(0, 6).toUpperCase();
   } while (getGameSessionById(sessionId) !== undefined);
-  const newSession: GameSession = {
-    id: sessionId,
-    gameId,
-    lobbyId,
-    players: [],
-    settings,
-    data,
-    state: "waiting",
-  };
+
+  const newSession: GameSession = GAMES[gameId].createGameSession(sessionId, lobbyId, settings);
+
   gameSessions.set(sessionId, newSession);
   return newSession;
 }
@@ -94,11 +87,18 @@ export function removePlayerFromSession(sessionId: string, playerId: string) {
     session.players[index] = undefined;
   }
 
-  if (session.players.length === 0) {
+  if (
+    session.players.length === 0 ||
+    // Game is ongoing ........ and All players had left i.e. all players are undefined
+    (session.state === "ongoing" && !session.players.some((ele) => ele !== undefined))
+  ) {
     session.state = "finished";
     io.to(session.lobbyId).emit("game-session-update", session);
     deleteGameSession(sessionId);
   }
+
+  GAMES[session.gameId].onPlayerLeave(session, playerId);
+
   return session;
 }
 
@@ -152,8 +152,7 @@ gameSessionsRouter.get("/:id", (req, res) => {
 
 gameSessionsRouter.post("/", (req, res) => {
   const { gameId, lobbyId, settings } = req.body;
-  const defaultData = GAMES[gameId]?.getDefaultData(settings) || {};
-  const newSession = createGameSession(gameId, lobbyId, settings || {}, defaultData);
+  const newSession = createGameSession(gameId, lobbyId, settings || {});
   res.status(201).json(newSession);
 });
 

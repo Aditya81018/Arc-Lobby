@@ -2,7 +2,6 @@ import { publicLinkTo, randInt } from "../helpers";
 import { Game, GameSetting } from "./types";
 import { io } from "../..";
 import { getUserById } from "../../features/users";
-import { getRandomValues } from "node:crypto";
 import { GameSession } from "../../features/game-sessions";
 import GAMES from ".";
 
@@ -21,9 +20,10 @@ interface SimpleGameData {
 
 interface SimpleGameSession extends GameSession {
   data: SimpleGameData;
+  nextTurn: () => void;
 }
 
-interface SimpleGame extends Game {
+interface SimpleGame extends Game<SimpleGameSession> {
   getRandomData: () => Pick<SimpleGameData, "target" | "options">;
 }
 
@@ -66,6 +66,25 @@ const simpleGame: SimpleGame = {
       ],
     } as GameSetting<number>,
   ],
+
+  createGameSession(id, lobbyId, settings): SimpleGameSession {
+    return {
+      id,
+      gameId: this.id,
+      lobbyId,
+      players: [],
+      settings,
+      data: this.getDefaultData(settings),
+      state: "waiting",
+      nextTurn() {
+        let turnOfPlayer;
+        do {
+          this.data.turnOf = (this.data.turnOf + 1) % this.players.length;
+          turnOfPlayer = this.players[this.data.turnOf];
+        } while (turnOfPlayer === undefined);
+      },
+    };
+  },
 
   getRandomData() {
     const target = randInt(1, 100);
@@ -111,7 +130,18 @@ const simpleGame: SimpleGame = {
     }
   },
 
-  initSockets(session: SimpleGameSession, socket) {
+  onPlayerLeave(session, playerId) {
+    if (session.state === "ongoing") {
+      const turnOfPlayer = session.players[session.data.turnOf];
+      if (turnOfPlayer === undefined) {
+        session.nextTurn();
+        io.to(session.id).emit("session-data-update", session.data);
+      }
+    }
+  },
+
+  initSockets(session, socket) {
+    const game = this;
     socket.on("option-select", onOptionSelect);
     function onOptionSelect(option: number) {
       const player = getUserById(socket.id)!;
@@ -119,7 +149,7 @@ const simpleGame: SimpleGame = {
       const playerData = session.data.playersData[playerDataID];
 
       session.data.message = `${player.name} selected ${option}`;
-      session.data.turnOf = (session.data.turnOf + 1) % session.players.length;
+      session.nextTurn();
 
       let closestOpt = session.data.options[0],
         farthestOpt = session.data.options[0];
@@ -132,7 +162,6 @@ const simpleGame: SimpleGame = {
       if (option === closestOpt) playerData.points++;
       else if (option === farthestOpt) playerData.lives--;
 
-      const game = GAMES[session.gameId] as SimpleGame;
       const randomData = game.getRandomData();
       session.data.target = randomData.target;
       session.data.options = randomData.options;
