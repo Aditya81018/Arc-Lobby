@@ -1,20 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { page } from '$app/state';
 	import { SquareArrowRightExit } from '@lucide/svelte';
-	import { leaveLobby } from './controllers';
-
-	const lobbyId = page.params.lobbyId!;
-
-	function handleLeaveLobby() {
-		if (confirm('Leave this lobby?')) {
-			leaveLobby(lobbyId);
-			goto('/');
-		}
-	}
+	import { resolve } from '$app/paths';
 </script>
 
-<button class="btn gap-2 text-error btn-ghost btn-sm lg:btn-md" onclick={handleLeaveLobby}>
+<a class="btn btn-wide btn-soft btn-error" href={resolve(`/`)}>
 	<SquareArrowRightExit />
-	<span class="xs:inline hidden">Leave</span>
-</button>
+	<span>Leave Button</span>
+</a>

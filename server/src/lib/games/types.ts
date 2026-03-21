@@ -5,7 +5,7 @@ export interface Game<TSession extends GameSession = GameSession> {
   id: string;
   name: string;
   image: string;
-  settings: GameSetting[];
+  settings: Record<string, GameSetting>;
 
   createGameSession: (id: string, lobbyId: string, settings: ProcessedSettings) => TSession;
   getDefaultData(settings: ProcessedSettings): TSession["data"];

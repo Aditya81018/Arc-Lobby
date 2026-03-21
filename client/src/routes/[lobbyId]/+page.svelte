@@ -14,6 +14,7 @@
 	import { gameSessionsStore } from '../../features/game-sessions/store';
 	import { userData } from '../../features/user/store';
 	import UserAvatar from '../../components/UserAvatar.svelte';
+	import { gamesStore } from '../../features/games/store';
 
 	const lobbyId = page.params.lobbyId!;
 	let message = $state('');
@@ -77,17 +78,17 @@
 
 	<div class="drawer-content flex h-svh flex-col overflow-hidden">
 		<header class="navbar shrink-0 border-b border-base-300 bg-base-100 px-4">
-			<div class="flex flex-1 gap-2">
-				<label for="member-drawer" class="btn btn-square btn-ghost btn-sm lg:hidden">
-					<Menu />
-				</label>
+			<div class="flex w-full flex-1 justify-between gap-2">
+				<label for="member-drawer" class="btn btn-square btn-ghost lg:hidden"><Menu /></label>
+				<div class="flex items-center justify-center gap-2">
+					<UserAvatar user={$userData} />
+					<!-- <span>{$userData.emoji}</span> -->
+					<span style="color: {$userData.color.foreground}">{$userData.name}</span>
+				</div>
 				<div class="flex flex-col justify-center">
-					<span class="text-xs leading-none font-bold uppercase opacity-50">Lobby</span>
+					<span class="text-right text-xs leading-none font-bold uppercase opacity-50">Lobby</span>
 					<span class="font-mono font-bold text-primary">#{lobbyId}</span>
 				</div>
-			</div>
-			<div class="flex-none">
-				<LeaveLobbyButton />
 			</div>
 		</header>
 
@@ -130,10 +131,11 @@
 
 										<div class="mt-2 flex flex-wrap gap-1">
 											{#each Object.entries(gameSession.settings) as [key, value], i (i)}
+												{@const setting = $gamesStore[gameSession.gameId].settings![key]}
 												<div
 													class="badge h-4 gap-1 border-none badge-ghost bg-black/10 px-1.5 py-0 text-[10px] opacity-80"
 												>
-													<span class="font-semibold uppercase">{key.replaceAll('-', ' ')}:</span>
+													<span class="font-semibold uppercase">{setting.name}:</span>
 													<span class="max-w-15 truncate italic">
 														{Array.isArray(value) ? value.length : value}
 													</span>
@@ -153,7 +155,24 @@
 										<SpectateGameSessionButton gameSessionId={gameSession.id} />
 									</div>
 								{:else if gameSession.state === 'finished'}
-									<div>Game Expired</div>
+									{#if gameSession.winner}
+										{@const winner = getMemberFromId(gameSession.winner)!}
+										<div class="mt-4 flex items-center gap-2">
+											<UserAvatar user={winner} />
+											<div class="font-medium">
+												<span style="color: {winner.color.foreground};">
+													{winner.name}
+												</span>
+												Won!
+											</div>
+										</div>
+									{:else}
+										<div class="mt-4 font-mono font-medium opacity-50">
+											{gameSession.winner
+												? getMemberFromId(gameSession.winner)?.name + ' Won!'
+												: 'Game Expired'}
+										</div>
+									{/if}
 								{/if}
 							</div>
 						{:else}
@@ -202,16 +221,19 @@
 
 	<div class="drawer-side z-50">
 		<label for="member-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-		<div class="menu min-h-full w-72 border-r border-base-300 bg-base-100 p-0">
-			<div class="flex items-center justify-between border-b border-base-300 bg-base-200/50 p-4">
+		<div class="flex h-svh w-72 flex-col items-center border-r border-base-300 bg-base-100 pb-4">
+			<div
+				class="flex w-full items-center justify-between border-b border-base-300 bg-base-200/50 p-4"
+			>
 				<h2 class="text-lg font-bold">Members</h2>
 				<div class="badge badge-primary">{$membersStore?.length}</div>
 			</div>
-			<ul class="space-y-1 p-2">
+			<ul class="flex h-full w-full flex-col p-2">
 				{#each $membersStore as member, i (i)}
 					<li>
-						<div class="flex items-center gap-3" style="color: {member.color.foreground}">
+						<div class="flex items-center gap-2 px-4 py-2" style="color: {member.color.foreground}">
 							<UserAvatar user={member} />
+							<!-- <span>{member.emoji}</span> -->
 							<span class="flex-1 truncate">{member.name}</span>
 							{#if member.id === $userData.id}
 								<span class="badge badge-sm badge-primary">You</span>
@@ -220,6 +242,7 @@
 					</li>
 				{/each}
 			</ul>
+			<LeaveLobbyButton />
 		</div>
 	</div>
 </div>

@@ -27,7 +27,7 @@
 	const handleGameSelect = (game: Game) => {
 		selectedGame = game;
 		const defaults: Record<string, any> = {};
-		game.settings?.forEach((s) => {
+		Object.values(game.settings || {}).forEach((s) => {
 			defaults[s.id] = s.defaultValue;
 		});
 		settingsValues = defaults;
@@ -97,10 +97,10 @@
 				</div>
 			{:else}
 				<div class="divide-y divide-base-200">
-					{#each selectedGame.settings || [] as setting, i (i)}
-						<div class="py-5 first:pt-0">
-							<label class="mb-3 block text-sm font-bold tracking-wider uppercase opacity-60">
-								{setting.name}
+					{#each Object.values(selectedGame.settings || {}) as setting, i (i)}
+						<div class="flex items-center gap-4 py-5 first:pt-0">
+							<label class="block text-sm font-bold tracking-wider uppercase opacity-60">
+								{setting.name}:
 							</label>
 
 							{#if setting.type === 'boolean'}

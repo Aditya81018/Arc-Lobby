@@ -31,8 +31,8 @@ const simpleGame: SimpleGame = {
   id: "simple-game",
   name: "Simple Game",
   image: publicLinkTo("/assets/simple-game-image.avif"),
-  settings: [
-    {
+  settings: {
+    "players-count": {
       id: "players-count",
       name: "Number of Players",
       type: "pick-one",
@@ -43,7 +43,7 @@ const simpleGame: SimpleGame = {
         { name: "4", value: 4 },
       ],
     } as GameSetting<number>,
-    {
+    target: {
       id: "target",
       name: "Target",
       type: "pick-one",
@@ -54,7 +54,7 @@ const simpleGame: SimpleGame = {
         { name: "5", value: 5 },
       ],
     } as GameSetting<number>,
-    {
+    lives: {
       id: "lives",
       name: "Lives",
       type: "pick-one",
@@ -65,7 +65,7 @@ const simpleGame: SimpleGame = {
         { name: "5", value: 5 },
       ],
     } as GameSetting<number>,
-  ],
+  },
 
   createGameSession(id, lobbyId, settings): SimpleGameSession {
     return {
@@ -119,7 +119,7 @@ const simpleGame: SimpleGame = {
 
     return {
       ...this.getRandomData(),
-      message: "Waiting for players",
+      message: "Waiting for players...",
       turnOf: 0,
       playersData,
     };

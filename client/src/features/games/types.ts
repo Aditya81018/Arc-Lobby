@@ -2,7 +2,7 @@ export interface Game {
 	id: string;
 	name: string;
 	image: string;
-	settings?: GameSetting[];
+	settings?: Record<string, GameSetting>;
 	getDefaultData(settings: Game['settings']): unknown;
 }
 
