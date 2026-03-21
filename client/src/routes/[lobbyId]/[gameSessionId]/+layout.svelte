@@ -14,6 +14,7 @@
 		getGameSessionById,
 		leaveGameSession
 	} from '../../../features/game-sessions/controller';
+	import LoadingScreen from '../../../components/LoadingScreen.svelte';
 
 	const { children } = $props();
 	const lobbyId = page.params.lobbyId!;
@@ -70,7 +71,7 @@
 </script>
 
 {#if isLoading}
-	<div>Joining Game...</div>
+	<LoadingScreen />
 {:else}
 	{@render children()}
 {/if}

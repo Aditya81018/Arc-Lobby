@@ -3,6 +3,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { socket } from '$lib/socket';
 	import { loadInitialDataFromServer } from '$lib/load-data';
+	import LoadingScreen from '../components/LoadingScreen.svelte';
 	let isLoading = $state(true);
 
 	let { children } = $props();
@@ -16,7 +17,7 @@
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
 {#if isLoading}
-	<div>Connecting to server...</div>
+	<LoadingScreen />
 {:else}
 	{@render children()}
 {/if}
