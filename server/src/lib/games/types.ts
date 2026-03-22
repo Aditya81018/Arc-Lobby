@@ -12,6 +12,7 @@ export interface Game<TSession extends GameSession = GameSession> {
   isJoinable: (session: TSession) => boolean;
   onPlayerJoin: (session: TSession, playerId: string) => void;
   onPlayerLeave: (session: TSession, playerId: string) => void;
+  onSessionEnd: (session: TSession) => void;
 
   // Will return a function to be called after player leaves, usually to remove socket listeners
   initSockets: (session: TSession, socket: Socket) => () => void;

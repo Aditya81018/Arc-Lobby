@@ -129,9 +129,14 @@ export function initGameSessionSockets(socket: Socket) {
     const session = getGameSessionById(sessionId);
     if (session) {
       session.spectators = session.spectators.filter((spectator) => spectator !== socket.id);
+
       if (session.spectators.length === 0) {
+        const game = GAMES[session.gameId];
+
         session.state = "finished";
         io.to(session.lobbyId).emit("game-session-update", session);
+
+        game.onSessionEnd(session);
         deleteGameSession(sessionId);
       }
     }

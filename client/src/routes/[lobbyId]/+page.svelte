@@ -156,12 +156,12 @@
 									</div>
 								{:else if gameSession.state === 'finished'}
 									{#if gameSession.winner}
-										{@const winner = getMemberFromId(gameSession.winner)!}
+										{@const winner = getMemberFromId(gameSession.winner) ?? undefined}
 										<div class="mt-4 flex items-center gap-2">
 											<UserAvatar user={winner} />
 											<div class="font-medium">
-												<span style="color: {winner.color.foreground};">
-													{winner.name}
+												<span style="color: {winner?.color.foreground};">
+													{winner?.name}
 												</span>
 												Won!
 											</div>

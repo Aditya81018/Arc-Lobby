@@ -12,8 +12,9 @@ export interface SimpleGameData {
 	message: string;
 	turnOf: number;
 	playersData: SimpleGamePlayer[];
+	nextTimestamp: number | undefined;
+	timerId: NodeJS.Timeout | undefined;
 }
-
 export interface SimpleGameSession extends GameSession {
 	data: SimpleGameData;
 }

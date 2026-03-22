@@ -53,7 +53,9 @@
 					: 'opacity-100'}"
 			>
 				<div id="index-number" class="text-9xl font-bold">{session.data.target}</div>
-				<div class="h-8 opacity-50">{session.data.message}</div>
+				<div class="h-8 opacity-50">
+					{session.data.message}
+				</div>
 				<div class="flex w-full items-center justify-center gap-4">
 					{#each session.data.options as option, i (i)}
 						<button
