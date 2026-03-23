@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Gamepad, X, ChevronLeft, Send } from '@lucide/svelte';
-	import type { Game } from './types';
+	import type { Game } from '../games/types';
 	import { sendGameSessionInvite } from '../messages/controller';
-	import { createGameSession, joinGameSession } from '../game-sessions/controller';
+	import { createGameSession, joinGameSession } from './controller';
 	import { page } from '$app/state';
 	import { userData } from '../user/store';
-	import { gamesStore } from './store';
+	import { gamesStore } from '../games/store';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import LoadingScreen from '../../components/LoadingScreen.svelte';

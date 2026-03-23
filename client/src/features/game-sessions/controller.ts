@@ -39,6 +39,17 @@ export async function leaveGameSession(gameSessionId: string): Promise<GameSessi
 	return gameSession;
 }
 
+export async function rematchGameSession(gameSessionId: string, playerId: string) {
+	const gameSession = await request<GameSession>(
+		`/game-sessions/${gameSessionId}/rematch`,
+		'POST',
+		{
+			playerId
+		}
+	);
+	return gameSession;
+}
+
 export async function getCurrentGameSessionPlayersData(gameSessionId: string) {
 	const playerData = await request<(UserData | undefined)[]>(
 		`/game-sessions/${gameSessionId}/players`

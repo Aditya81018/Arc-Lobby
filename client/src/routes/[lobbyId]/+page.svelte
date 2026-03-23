@@ -7,7 +7,7 @@
 	import { membersStore } from '../../features/lobby/store';
 	import { sendTextMessage } from '../../features/messages/controller';
 	import { lobbyMessagesStore } from '../../features/messages/store';
-	import SendGameInviteButton from '../../features/games/SendGameInviteButton.svelte';
+	import SendGameInviteButton from '../../features/game-sessions/SendGameInviteButton.svelte';
 	import { getLocalGameById } from '../../features/games/controller';
 	import JoinGameSessionButton from '../../features/game-sessions/JoinGameSessionButton.svelte';
 	import SpectateGameSessionButton from '../../features/game-sessions/SpectateGameSessionButton.svelte';

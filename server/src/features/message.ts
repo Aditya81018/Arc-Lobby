@@ -10,8 +10,12 @@ export interface Message {
   timestamp: number;
 }
 
+export function sendMessage(roomId: string, message: Message) {
+  io.to(roomId).emit("new-message", message);
+}
+
 export function initMessageSockets(socket: Socket) {
   socket.on("send-message", (message: Message) => {
-    io.to(message.roomId).emit("new-message", message);
+    sendMessage(message.roomId, message);
   });
 }

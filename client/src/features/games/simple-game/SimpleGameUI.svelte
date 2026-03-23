@@ -5,6 +5,7 @@
 	import type { SimpleGameSession } from './types';
 	import { SquareArrowRightExit } from '@lucide/svelte';
 	import PlayersLayout from './PlayersLayout.svelte';
+	import RematchButton from '../../game-sessions/RematchButton.svelte';
 
 	const {
 		session,
@@ -40,9 +41,10 @@
 			{@const winner = players.find((player) => player?.id === session.winner)}
 			<div class="flex flex-col items-center gap-4">
 				<div class="text-4xl font-black">{winner?.name ?? 'Unknown'} Won!</div>
-				<a href={resolve(`/${session.lobbyId}`)} class="btn w-fit btn-sm btn-primary"
-					>Back to Lobby</a
-				>
+				<div class="flex gap-2">
+					<RematchButton {session} />
+					<a href={resolve(`/${session.lobbyId}`)} class="btn w-fit btn-primary">Back to Lobby</a>
+				</div>
 			</div>
 		{:else}
 			<!-- else content here -->

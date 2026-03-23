@@ -3,6 +3,7 @@ import GAMES from "../lib/games";
 import { getUserById } from "./users";
 import { Socket } from "socket.io";
 import { io } from "..";
+import { sendMessage } from "./message";
 
 export interface GameSession {
   id: string;
@@ -18,6 +19,7 @@ export interface GameSession {
 
 const gameSessions = new Map<string, GameSession>();
 const userToGameSession = new Map<string, string>();
+const rematchRecord = new Map<string, string>(); // Prev Session -> New Session
 
 // Controllers
 
@@ -138,6 +140,7 @@ export function initGameSessionSockets(socket: Socket) {
 
         game.onSessionEnd(session);
         deleteGameSession(sessionId);
+        rematchRecord.delete(session.id);
       }
     }
     if (removeGameSockets) removeGameSockets();
@@ -189,6 +192,38 @@ gameSessionsRouter.post("/:id/leave", (req, res) => {
   if (!session) return;
   io.to(session.id).emit("players-update", session.players);
   res.json(session);
+});
+
+gameSessionsRouter.post("/:id/rematch", (req, res) => {
+  const { playerId } = req.body;
+  const gameSessionId = req.params.id;
+  const gameSession = getGameSessionById(gameSessionId);
+
+  if (!gameSession) return;
+
+  const rematchTo = rematchRecord.get(gameSessionId);
+
+  if (rematchTo === undefined) {
+    const newGameSession = createGameSession(
+      gameSession.gameId,
+      gameSession.lobbyId,
+      gameSession.settings,
+    );
+    rematchRecord.set(gameSession.id, newGameSession.id);
+    io.to(gameSession.id).emit("rematch", newGameSession.id, playerId);
+    sendMessage(newGameSession.lobbyId, {
+      id: crypto.randomUUID(),
+      roomId: newGameSession.lobbyId,
+      senderId: playerId,
+      type: "game-session-invite",
+      content: newGameSession.id,
+      timestamp: Date.now(),
+    });
+    return res.json(newGameSession);
+  } else {
+    const rematchGameSession = getGameSessionById(rematchTo);
+    return res.json(rematchGameSession);
+  }
 });
 
 gameSessionsRouter.get("/:id/players", (req, res) => {
