@@ -1,7 +1,7 @@
 import request from '$lib/request';
 import { get } from 'svelte/store';
-import { type GameSession } from './store';
-import { userData, type UserData } from '../user/store';
+import { gameSessionsStore, type GameSession } from './store';
+import { userData } from '../user/store';
 
 export async function createGameSession(
 	gameId: string,
@@ -21,6 +21,11 @@ export async function getGameSessionById(id: string): Promise<GameSession | null
 	return gameSession;
 }
 
+export function getLocalGameSessionById(id: string) {
+	const gameSession = get(gameSessionsStore)[id];
+	return gameSession;
+}
+
 export async function joinGameSession(gameSessionId: string): Promise<GameSession> {
 	const playerId = get(userData).id;
 	const gameSession = await request<GameSession>(`/game-sessions/${gameSessionId}/join`, 'POST', {
@@ -35,7 +40,6 @@ export async function leaveGameSession(gameSessionId: string): Promise<GameSessi
 	const gameSession = await request<GameSession>(`/game-sessions/${gameSessionId}/leave`, 'POST', {
 		playerId
 	});
-	console.log('leave session set to null', gameSession);
 	return gameSession;
 }
 
@@ -48,11 +52,4 @@ export async function rematchGameSession(gameSessionId: string, playerId: string
 		}
 	);
 	return gameSession;
-}
-
-export async function getCurrentGameSessionPlayersData(gameSessionId: string) {
-	const playerData = await request<(UserData | undefined)[]>(
-		`/game-sessions/${gameSessionId}/players`
-	);
-	return playerData;
 }

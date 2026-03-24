@@ -9,12 +9,9 @@
 		currentGameSessionStore,
 		type GameSession
 	} from '../../../features/game-sessions/store';
-	import {
-		getCurrentGameSessionPlayersData,
-		getGameSessionById,
-		leaveGameSession
-	} from '../../../features/game-sessions/controller';
+	import { getGameSessionById, leaveGameSession } from '../../../features/game-sessions/controller';
 	import LoadingScreen from '../../../components/LoadingScreen.svelte';
+	import { getLocalMembers } from '../../../features/lobby/controllers';
 
 	const { children } = $props();
 	const lobbyId = page.params.lobbyId!;
@@ -28,7 +25,7 @@
 				return;
 			}
 			$currentGameSessionStore.players = players;
-			$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
+			$currentGameSessionPlayersStore = getLocalMembers(players);
 		}
 
 		async function handleSessionDataUpdate(newData: GameSession['data']) {
@@ -45,7 +42,7 @@
 				}
 
 				$currentGameSessionStore = gameSession;
-				$currentGameSessionPlayersStore = await getCurrentGameSessionPlayersData(gameSessionId);
+				$currentGameSessionPlayersStore = await getLocalMembers(gameSession.players);
 
 				socket.emit('join-game-session', gameSessionId);
 				socket.on('players-update', handlePlayersUpdate);

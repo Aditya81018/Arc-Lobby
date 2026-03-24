@@ -47,3 +47,8 @@ export function getMemberFromId(memberId: string) {
 	if (!members) return null;
 	return members.find((member) => member.id === memberId) || null;
 }
+
+export function getLocalMembers(membersId: (string | undefined)[]) {
+	const playerData = membersId.map((id) => (id ? (getMemberFromId(id) ?? undefined) : undefined));
+	return playerData;
+}
