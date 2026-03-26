@@ -1,13 +1,11 @@
-<script lang="ts">
-	import { goto } from '$app/navigation';
+<script>
 	import { resolve } from '$app/paths';
-	import { page } from '$app/state';
-
-	const lobbyId = page.params.lobbyId!;
-
-	async function handleLeaveGameSession() {
-		goto(resolve(`/${lobbyId}`));
-	}
+	import { SquareArrowRightExit } from '@lucide/svelte';
+	import { currentGameSessionStore as session } from './store';
 </script>
 
-<button class="btn btn-primary" onclick={handleLeaveGameSession}>Leave Game</button>
+<a
+	href={resolve(`/${$session?.lobbyId}`)}
+	class="btn absolute top-4 right-4 z-50 btn-square btn-soft btn-error"
+	><SquareArrowRightExit />
+</a>

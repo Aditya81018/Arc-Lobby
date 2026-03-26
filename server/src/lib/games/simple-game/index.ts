@@ -1,9 +1,9 @@
-import { publicLinkTo, randInt } from "../helpers";
-import { Game, GameSetting } from "./types";
-import { io } from "../..";
-import { getUserById } from "../../features/users";
-import { GameSession } from "../../features/game-sessions";
-import GAMES from ".";
+import { publicLinkTo, randInt } from "../../helpers";
+import { Game, GameSetting } from "../types";
+import { io } from "../../..";
+import { getUserById } from "../../../features/users";
+import { GameSession } from "../../../features/game-sessions";
+import GAMES from "..";
 
 interface SimpleGamePlayer {
   id: number; // index of the player in the session.players array
@@ -26,7 +26,7 @@ interface SimpleGamePrivateData {
 interface SimpleGameSession extends GameSession {
   data: SimpleGameData;
   nextTurn: () => void;
-  onOptionSelect: (option: number) => void;
+  handleOptionSelect: (option: number) => void;
   onTimeRunOut: () => void;
 }
 
@@ -106,7 +106,7 @@ const simpleGame: SimpleGame = {
           )
         );
       },
-      onOptionSelect(option: number) {
+      handleOptionSelect(option: number) {
         clearTimeout(privateData[this.id].timerId);
 
         const player = getUserById(this.players[this.data.turnOf]!)!;
@@ -254,14 +254,14 @@ const simpleGame: SimpleGame = {
   },
 
   initSockets(session, socket) {
-    function handleOptionSelect(option: number) {
-      session.onOptionSelect(option);
+    function onOptionSelect(option: number) {
+      session.handleOptionSelect(option);
     }
 
-    socket.on("option-select", handleOptionSelect);
+    socket.on("option-select", onOptionSelect);
 
     return () => {
-      socket.off("option-select", handleOptionSelect);
+      socket.off("option-select", onOptionSelect);
     };
   },
 };

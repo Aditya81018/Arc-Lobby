@@ -29,6 +29,10 @@
 			session
 		};
 	}
+
+	$effect(() => {
+		console.log(players);
+	});
 </script>
 
 <div class="relative flex h-full w-full items-center justify-center">

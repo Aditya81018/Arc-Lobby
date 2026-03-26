@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { type UserData, userData as user } from '../../user/store';
-	import { resolve } from '$app/paths';
 	import { socket } from '$lib/socket';
 	import type { SimpleGameSession } from './types';
-	import { SquareArrowRightExit } from '@lucide/svelte';
 	import PlayersLayout from './PlayersLayout.svelte';
 	import RematchButton from '../../game-sessions/RematchButton.svelte';
+	import LeaveGameSessionButton from '../../game-sessions/LeaveGameSessionButton.svelte';
+	import BackToLobbyButton from '../../game-sessions/BackToLobbyButton.svelte';
 
 	const {
 		session,
@@ -30,11 +30,7 @@
 </script>
 
 <div class="flex h-full flex-col p-4">
-	<a
-		href={resolve(`/${session.lobbyId}`)}
-		class="btn absolute top-4 right-4 z-50 btn-square btn-soft btn-error"
-		><SquareArrowRightExit />
-	</a>
+	<LeaveGameSessionButton />
 
 	<PlayersLayout {players} playersData={session.data.playersData} {session}>
 		{#if session.state === 'finished'}
@@ -43,7 +39,7 @@
 				<div class="text-4xl font-black">{winner?.name ?? 'Unknown'} Won!</div>
 				<div class="flex gap-2">
 					<RematchButton {session} />
-					<a href={resolve(`/${session.lobbyId}`)} class="btn w-fit btn-primary">Back to Lobby</a>
+					<BackToLobbyButton {session} />
 				</div>
 			</div>
 		{:else}
