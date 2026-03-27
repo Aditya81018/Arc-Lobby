@@ -4,10 +4,8 @@
 	import { socket } from '$lib/socket';
 	import { onMount } from 'svelte';
 	import LoadingScreen from '../../components/LoadingScreen.svelte';
-	// import { sendGameSessionInvite } from '../messages/controller';
-	// import { userData } from '../user/store';
 	import { joinGameSession, rematchGameSession } from './controller';
-	import type { GameSession } from './store';
+	import { gameSessionsStore, type GameSession } from './store';
 	import { getMemberFromId } from '../lobby/controllers';
 	import { userData } from '../user/store';
 	import UserAvatar from '../../components/UserAvatar.svelte';
@@ -25,6 +23,9 @@
 
 	let isLoading = $state(false);
 	let incomingRequest = $state<IncomingRequest | undefined>(undefined);
+	let incomingSession = $derived(
+		incomingRequest ? $gameSessionsStore[incomingRequest.newSessionId] : undefined
+	);
 	let fromPlayer = $derived(getMemberFromId(incomingRequest?.fromPlayerId ?? ''));
 
 	async function handleRequestRematch() {
@@ -63,11 +64,20 @@
 				isLoading = false;
 			}
 		} catch {
-			goto(resolve(`/${session.lobbyId}`));
+			goto(resolve(`/${session.lobbyId}/${incomingRequest.newSessionId}`));
 		}
 	}
 
-	function handleDeclineRematch() {
+	async function handleSpectateRematch() {
+		if (!incomingSession) return;
+		goto(
+			resolve(
+				`/${incomingSession.lobbyId}/redirect?to=/${incomingSession.lobbyId}/${incomingSession.id}`
+			)
+		);
+	}
+
+	function goBackToLobby() {
 		goto(resolve(`/${session.lobbyId}`));
 	}
 
@@ -101,9 +111,25 @@
 					{fromPlayer?.name ?? 'Unknown'}
 				</span>
 			</div>
+			<div class="text-sm font-medium opacity-50">
+				{#if incomingSession?.state === 'waiting'}
+					Waiting for players...
+				{:else if incomingSession?.state === 'ongoing'}
+					Game started!
+				{:else}
+					Game ended!
+				{/if}
+			</div>
 			<div class="flex gap-2">
-				<button class="btn btn-success" onclick={handleAcceptRematch}>Accept</button>
-				<button class="btn btn-error" onclick={handleDeclineRematch}>Decline</button>
+				{#if incomingSession?.state === 'waiting'}
+					<button class="btn btn-success" onclick={handleAcceptRematch}>Accept</button>
+					<button class="btn btn-error" onclick={goBackToLobby}>Decline</button>
+				{:else if incomingSession?.state === 'ongoing'}
+					<button class="btn btn-warning" onclick={handleSpectateRematch}>Spectate</button>
+					<button class="btn btn-error" onclick={goBackToLobby}>Decline</button>
+				{:else if incomingSession?.state === 'finished'}
+					<button class="btn btn-warning" onclick={goBackToLobby}>Back To Lobby</button>
+				{/if}
 			</div>
 		</div>
 	</div>
