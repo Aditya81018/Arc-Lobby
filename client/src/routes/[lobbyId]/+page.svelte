@@ -144,7 +144,11 @@
 												>
 													<span class="font-semibold uppercase">{setting.name}:</span>
 													<span class="max-w-15 truncate italic">
-														{Array.isArray(value) ? value.length : value}
+														{#if typeof value === 'boolean'}
+															{value === true ? 'Yes' : 'No'}
+														{:else}
+															{Array.isArray(value) ? value.length : value}
+														{/if}
 													</span>
 												</div>
 											{/each}

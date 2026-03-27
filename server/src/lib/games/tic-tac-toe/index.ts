@@ -82,29 +82,50 @@ const ticTacToe: TicTacToe = {
       },
 
       handlePlaceToken(position) {
+        // if game isn't ongoing then exit
         if (this.state !== "ongoing") return;
 
+        // if position is already taken then exit
+        if (
+          this.data.playersData[0].moves.includes(position) ||
+          this.data.playersData[1].moves.includes(position)
+        )
+          return;
+
+        // end previous timer
         const prevTimer = privateData.get(this.id)?.timerId;
         if (prevTimer) clearTimeout(prevTimer);
 
         const playerData = this.data.playersData[this.data.turnOf];
         playerData.moves.push(position);
 
+        // removing oldest tokens and keep only 3
         if (this.settings["is-moving"] && playerData.moves.length > 3) {
           playerData.moves.splice(0, 1);
         }
 
+        // if player has won
         if (this.hasPlayerWon(playerData.moves)) {
           this.winner = this.players[playerData.id];
           this.state = "finished";
           io.to(this.lobbyId).emit("game-session-update", this);
         }
+        // else if board is filled
+        else if (
+          this.data.playersData[0].moves.length + this.data.playersData[1].moves.length ===
+          9
+        ) {
+          this.winner = "draw";
+          this.state = "finished";
+          io.to(this.lobbyId).emit("game-session-update", this);
+        }
 
-        // processing...
+        // move forward in game if game is still ongoing
         if (this.state === "ongoing") {
           this.data.turnOf = this.data.turnOf === 0 ? 1 : 0;
           this.resetTimer();
         }
+
         io.to(this.id).emit("session-data-update", this.data);
       },
 

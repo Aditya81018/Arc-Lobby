@@ -6,6 +6,6 @@
 
 <a
 	href={resolve(`/${$session?.lobbyId}`)}
-	class="btn absolute top-4 right-4 z-50 btn-square btn-soft btn-error"
+	class="btn absolute top-4 right-4 z-100 btn-square btn-soft btn-error"
 	><SquareArrowRightExit />
 </a>

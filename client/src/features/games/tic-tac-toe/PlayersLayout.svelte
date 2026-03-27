@@ -29,9 +29,9 @@
 </script>
 
 <div class="relative flex h-full w-full flex-col items-center justify-around gap-8 py-8">
-	<div class="top-2"><PlayerCard {...getPlayerCardPropsFor(1)} /></div>
+	<div class=""><PlayerCard {...getPlayerCardPropsFor(1)} /></div>
 
 	{@render children()}
 
-	<div class="bottom-2"><PlayerCard {...getPlayerCardPropsFor(0)} /></div>
+	<div class="relative z-0"><PlayerCard {...getPlayerCardPropsFor(0)} /></div>
 </div>
