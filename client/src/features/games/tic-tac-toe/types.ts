@@ -11,6 +11,7 @@ export interface TicTacToeData {
 	turnOf: number;
 	playersData: [TicTacToePlayer, TicTacToePlayer];
 	nextTimestamp: number;
+	winningCombo: number | undefined;
 }
 
 export interface TicTacToeSession extends GameSession {

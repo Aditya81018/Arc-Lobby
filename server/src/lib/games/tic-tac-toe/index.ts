@@ -23,6 +23,7 @@ interface TicTacToeData {
   turnOf: number;
   playersData: [TicTacToePlayer, TicTacToePlayer];
   nextTimestamp: number;
+  winningCombo: number | undefined;
 }
 
 interface TicTacToeSession extends GameSession {
@@ -30,7 +31,7 @@ interface TicTacToeSession extends GameSession {
   onTimeRunOut: () => void;
   resetTimer: () => void;
   handlePlaceToken: (position: number) => void;
-  hasPlayerWon: (moves: number[]) => boolean;
+  findWinningCombo: (moves: number[]) => number | undefined;
 }
 
 interface TicTacToe extends Game<TicTacToeSession> {}
@@ -105,7 +106,8 @@ const ticTacToe: TicTacToe = {
         }
 
         // if player has won
-        if (this.hasPlayerWon(playerData.moves)) {
+        this.data.winningCombo = this.findWinningCombo(playerData.moves);
+        if (this.data.winningCombo !== undefined) {
           this.winner = this.players[playerData.id];
           this.state = "finished";
           io.to(this.lobbyId).emit("game-session-update", this);
@@ -129,7 +131,7 @@ const ticTacToe: TicTacToe = {
         io.to(this.id).emit("session-data-update", this.data);
       },
 
-      hasPlayerWon(moves) {
+      findWinningCombo(moves) {
         const WIN_COMBOS = ["012", "345", "678", "036", "147", "258", "048", "246"];
         const movesStr = moves.join();
         for (const combo of WIN_COMBOS) {
@@ -138,9 +140,9 @@ const ticTacToe: TicTacToe = {
             movesStr.includes(combo[1]) &&
             movesStr.includes(combo[2])
           )
-            return true;
+            return WIN_COMBOS.indexOf(combo);
         }
-        return false;
+        return undefined;
       },
     };
 
@@ -162,6 +164,7 @@ const ticTacToe: TicTacToe = {
         },
       ],
       nextTimestamp: 0,
+      winningCombo: undefined,
     };
 
     return data;

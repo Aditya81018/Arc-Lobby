@@ -167,22 +167,27 @@
 									</div>
 								{:else if gameSession.state === 'finished'}
 									{#if gameSession.winner}
-										{@const winner = getMemberFromId(gameSession.winner) ?? undefined}
+										{@const winner =
+											gameSession.winner === 'draw'
+												? 'draw'
+												: (getMemberFromId(gameSession.winner) ?? undefined)}
 										<div class="mt-4 flex items-center gap-2">
-											<UserAvatar user={winner} />
-											<div class="font-medium">
-												<span style="color: {winner?.color.foreground};">
-													{winner?.name}
-												</span>
-												Won!
-											</div>
+											{#if winner === 'draw'}
+												<div class="font-mono font-medium opacity-50">Game Draw</div>
+											{:else if winner === undefined}
+												<div class="font-mono font-medium opacity-50">Game Ended</div>
+											{:else}
+												<UserAvatar user={winner} />
+												<div class="font-medium">
+													<span style="color: {winner.color.foreground};">
+														{winner.name}
+													</span>
+													Won!
+												</div>
+											{/if}
 										</div>
 									{:else}
-										<div class="mt-4 font-mono font-medium opacity-50">
-											{gameSession.winner
-												? getMemberFromId(gameSession.winner)?.name + ' Won!'
-												: 'Game Expired'}
-										</div>
+										<div class="mt-4 font-mono font-medium opacity-50">Game Expired</div>
 									{/if}
 								{/if}
 							</div>
