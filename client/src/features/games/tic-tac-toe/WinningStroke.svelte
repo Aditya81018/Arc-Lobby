@@ -4,8 +4,6 @@
 	}: {
 		combo: number;
 	} = $props();
-
-	console.log(combo);
 </script>
 
 {#if combo === 0}
@@ -48,7 +46,7 @@
 		}
 
 		&.vertical {
-			@apply top-1/2 -translate-x-1/2 -translate-y-1/2 rotate-90;
+			@apply top-1/2 -translate-x-[calc(50%-1px)] -translate-y-1/2 rotate-90;
 		}
 
 		&.slant {

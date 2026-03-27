@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 import { GameSession } from "../../../features/game-sessions";
 import { Game, ProcessedSettings } from "../types";
-import { publicLinkTo } from "../../helpers";
+import { pickRandom, publicLinkTo } from "../../helpers";
 import { io } from "../../..";
 
 const ANIMATION_INTERVAL = 1 * 1000; // SEC * 1000
@@ -70,8 +70,18 @@ const ticTacToe: TicTacToe = {
       onTimeRunOut() {
         if (this.state !== "ongoing") return;
 
-        this.winner = this.players[this.data.turnOf === 0 ? 1 : 0];
-        this.state = "finished";
+        const playerData = this.data.playersData[this.data.turnOf];
+        const otherPlayerData = this.data.playersData[playerData.id === 0 ? 1 : 0];
+        const playedMoves = [...playerData.moves, ...otherPlayerData.moves];
+        const unplayedMoves = [];
+        for (let i = 0; i < 8; i++) {
+          if (!playedMoves.includes(i)) unplayedMoves.push(i);
+        }
+
+        const randomMove = pickRandom(unplayedMoves);
+        if (!randomMove) return;
+
+        this.handlePlaceToken(randomMove);
         io.to(this.lobbyId).emit("game-session-update", this);
       },
 
@@ -100,7 +110,7 @@ const ticTacToe: TicTacToe = {
         const playerData = this.data.playersData[this.data.turnOf];
         playerData.moves.push(position);
 
-        // removing oldest tokens and keep only 3
+        // if its moving pieces is true then remove oldest tokens and keep only 3
         if (this.settings["is-moving"] && playerData.moves.length > 3) {
           playerData.moves.splice(0, 1);
         }
